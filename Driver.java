@@ -22,12 +22,19 @@ public class Driver {
             System.out.println(e);
         }
 
-        final String ID = ""; // Login ID goes Here
-        final String PW = ""; //Login Password goes here
-        final String SERVER = ""; //server location goes here
+        final String ID = "root"; // Login ID goes Here
+        final String PW = "HTparking2002!"; //Login Password goes here
+        final String SERVER = "jdbc:mysql://127.0.0.1:3306/?user=root"; //server location goes here
 
         try{
             Connection con = DriverManager.getConnection(SERVER, ID, PW);
+
+            if (con != null) {
+                System.out.println("Connection successful!");
+            } else {
+                System.out.println("Failed to make connection!");
+            }
+
             Statement stmt = con.createStatement(); // creates a statement object
 
             ResultSet rs = stmt.executeQuery("Select <> From <> Where <>"); //Statement.executeQuery returns a ResultSet Object
