@@ -1,11 +1,11 @@
 USE database_project_schema;
 
 CREATE TABLE User (
-    user_id INT AUTO_INCREMENT PRIMARY KEY, -- changed type to int, made auto-incrementing
+    user_id INT AUTO_INCREMENT PRIMARY KEY, 
     user_name VARCHAR(100),
     email VARCHAR(100),
-    phone_number INT(10), -- changed type from VARCHAR to int(10) ###-###-####
-    addr VARCHAR(255), -- changed name from keyword location to addr(ess)
+    phone_number BIGINT, 
+    addr VARCHAR(255), 
     rating FLOAT
 );
 
@@ -14,7 +14,7 @@ CREATE TABLE Carrier (
     is_available BOOLEAN, 
     make VARCHAR(100), 
     model VARCHAR(100), 
-    year INT(4), -- changed from VARCHAR to INT(4)
+    year INT(4), 
     color VARCHAR(100), 
     plate VARCHAR(10), 
 	FOREIGN KEY (user_id) REFERENCES User(user_id)
@@ -36,7 +36,7 @@ CREATE TABLE Item (
 	item_id VARCHAR(50) PRIMARY KEY, 
     name VARCHAR(100), 
     description VARCHAR(250), 
-    price FLOAT, -- changed type from double to float
+    price FLOAT,
     category VARCHAR(50), 
     in_stock BOOLEAN,
     item_count INT, 
@@ -44,23 +44,22 @@ CREATE TABLE Item (
     FOREIGN KEY (shipper_id) REFERENCES Shipper(user_id)
 );
 
--- removed messageID attribute, as attrs sender_id, reciever_id & time_sent are sufficent
 CREATE TABLE Message ( 
     message_content TEXT, 
     sender_id INT, 
     receiver_id INT, 
-    time_sent TIMESTAMP, -- consolidated date & time attributes into single timestamp attribute
-    PRIMARY KEY (sender_id, receiver_id, time_sent), -- altered primary key to reflect
+    time_sent TIMESTAMP, 
+    PRIMARY KEY (sender_id, receiver_id, time_sent), 
     FOREIGN KEY (sender_id) REFERENCES User(user_id), 
     FOREIGN KEY (receiver_id) REFERENCES User(user_id)
 );
 
-CREATE TABLE Shipment( -- strictly speaking this table does not fit ideal normal forms because
-	shipment_id INT AUTO_INCREMENT PRIMARY KEY, -- combo of pickup_time, shipper_id, carrier_id, & reciever_id are also a candidate key
-    status VARCHAR(50), -- also made shipment ID auto-incrementing
+CREATE TABLE Shipment( 
+	shipment_id INT AUTO_INCREMENT PRIMARY KEY, 
+    status VARCHAR(50), 
     current_location VARCHAR (100), 
-    pickup_time TIMESTAMP, -- consolidated date & time attrs into single attr of type TIMESTAMP
-    dropoff_time TIMESTAMP, -- removed estimated dropoff time for simplicity
+    pickup_time TIMESTAMP, 
+    dropoff_time TIMESTAMP, 
     price FLOAT, 
     shipper_id INT,
     carrier_id INT, 
@@ -71,10 +70,9 @@ CREATE TABLE Shipment( -- strictly speaking this table does not fit ideal normal
 );
 
 CREATE TABLE Transaction(
-	transaction_id INT AUTO_INCREMENT PRIMARY KEY, -- changed type from varchar to int
-    amount FLOAT, -- changed type from double to float 
-    -- removed STATUS attr as status can be inferred from whether the time_paid attr is or is not null
-    time_paid TIMESTAMP,  -- consolidated into single timestamp
+	transaction_id INT AUTO_INCREMENT PRIMARY KEY, 
+    amount FLOAT,
+    time_paid TIMESTAMP,  
     shipment_id INT, 
     FOREIGN KEY (shipment_id) REFERENCES Shipment(shipment_id)
 );
@@ -82,7 +80,7 @@ CREATE TABLE Transaction(
 CREATE TABLE Contains(
 	item_id VARCHAR(50),
     shipment_id INT, 
-    amount FLOAT, -- changed from int to float
+    amount FLOAT, 
     PRIMARY KEY (item_id, shipment_id), 
     FOREIGN KEY (item_id) REFERENCES Item(item_id), 
     FOREIGN KEY (shipment_id) REFERENCES Shipment(shipment_id)
