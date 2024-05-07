@@ -2,6 +2,7 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
@@ -10,8 +11,6 @@ public class Driver {
 
     Connection con;
     /* TODO:
-     *      - Double-Check Library for hosting SQL Database 
-     *      - waiting on library to download, its gonna be big unhappy w/ me for rn
      * 
      */
 
@@ -48,21 +47,46 @@ public class Driver {
     }
 
 
-    public void addNewUser(String type, String name, String email, String phone) throws SQLException{
-        // checking to make sure that we recieve a valid type
-        if((type.toLowerCase() == "reciever") || (type.toLowerCase() == "carrier") || (type.toLowerCase() == "shipper")){
-            PreparedStatement pstmt = con.prepareStatement("INSERT INTO " + type.toUpperCase() +"('Name','Email','Phone') VALUES(?,?,?)");
-            //Assuming we use  auto-increment for UID because it's,,, so much easier and nicer
-            pstmt.setString(1, name);
-            pstmt.setString(2, email);
-            pstmt.setString(3, phone);
-            pstmt.executeUpdate();
-        }
-        else{
-            // in case of invalid type entered
-            System.out.println("Please try again and enter a vlid user type! {reciever, carrier, shipper}");
-        }
 
+    public void displayAvailableShipmentsToCarrier() throws SQLException{
+        // Implimenting one of the expected queries
+        Statement stmt = con.createStatement(); // create a new statement object
+        ResultSet rs = stmt.executeQuery("SELECT * FROM Shipments WHERE 'pickup_time' IS NULL");
+        ResultSetMetaData rsmt = rs.getMetaData();
+        // this part lists all the results from the query, can be trimmed later for only relavent information
+        while(rs.next()){
+            for (int i = 1; i <= rsmt.getColumnCount(); i++){
+                if (i > 1) System.out.print(", ");
+                System.out.print(rs.getString(i) + " " + rsmt.getColumnName(i));
+            }
+            System.out.println("");
+        }
+    }
+
+    public String getShipperAddressByShipmentID(int shipmentID ) throws SQLException{
+        // the goal of this is to return the 
+        Statement stmt = con.createStatement(); // create a new statement object
+        ResultSet rs = stmt.executeQuery("SELECT addr FROM User WHERE user_id = " + shipmentID);
+        return rs.getString(0); // this will be the first response, no check to ensure its the only one
+    
+    }
+
+    public void addNewUser(String type, String name, String email, String phone) throws SQLException{
+        PreparedStatement pstmt = con.prepareStatement("INSERT INTO ? ('Name','Email','Phone') VALUES(?,?,?)");
+        pstmt.setString(0, "User");
+        pstmt.setString(1, name);
+        pstmt.setString(2, email);
+        pstmt.setString(3, phone);
+        pstmt.executeUpdate();
+        // checking to make sure that we recieve a valid type
+        switch(type.toLowerCase()){
+            case "reciever","carrier","shipper":
+            pstmt.setString(0, type.toLowerCase());
+            pstmt.executeUpdate();
+            
+            default:
+                System.out.println("Please try again and enter a valid user type! {reciever, carrier, shipper}");
+        }
     }
 
     public void addItemToShipperInventory(String shipper, String itemName, Float price) throws SQLException{
