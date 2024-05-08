@@ -25,7 +25,7 @@ public class Driver {
 
         final String ID = "root"; // Login ID goes Here
         final String PW = "HTparking2002!"; //Login Password goes here
-        final String SERVER = "jdbc:mysql://127.0.0.1:3306/?user=root"; //server location goes here
+        final String SERVER = "jdbc:mysql://127.0.0.1:3306/DB_Project?user=root"; //server location goes here
 
         try{
             Connection con = DriverManager.getConnection(SERVER, ID, PW);
