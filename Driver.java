@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 import java.util.*; 
 
 public class Driver {
@@ -312,6 +313,7 @@ public class Driver {
             System.out.println("Item ID: " + rs.getInt("item_id") + ", Amount: " + rs.getInt("amount"));
         }
     
+        // Display the location of the shipper
         pstmt = con.prepareStatement("SELECT * FROM Shipper WHERE user_id = (SELECT shipper_id FROM Shipment WHERE shipment_id = ?)");
         pstmt.setInt(1, shipmentId);
         rs = pstmt.executeQuery();
@@ -338,8 +340,10 @@ public class Driver {
 
     // pick up the shipment and update the status of the shipment
     public void updateShipmentStatus(int shipmentId) throws SQLException {
-        PreparedStatement pstmt = con.prepareStatement("UPDATE Shipment SET status = 'picked up' WHERE shipment_id = ?");
-        pstmt.setInt(1, shipmentId);
+        PreparedStatement pstmt = con.prepareStatement("UPDATE Shipment SET status = ?, pickup_time = ? WHERE shipment_id = ?");
+        pstmt.setString(1, "picked up");
+        pstmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+        pstmt.setInt(3, shipmentId);
         pstmt.executeUpdate();
 
         System.out.println("Shipment " + shipmentId + " has been picked up.");
@@ -350,8 +354,10 @@ public class Driver {
 
     // deliver the shipment and update the status of the shipment
     public void deliverShipment(int shipmentId) throws SQLException {
-        PreparedStatement pstmt = con.prepareStatement("UPDATE Shipment SET status = 'delivered' WHERE shipment_id = ?");
-        pstmt.setInt(1, shipmentId);
+        PreparedStatement pstmt = con.prepareStatement("UPDATE Shipment SET status = ?, dropoff_time = ? WHERE shipment_id = ?");
+        pstmt.setString(1, "delivered");
+        pstmt.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+        pstmt.setInt(3, shipmentId);
         pstmt.executeUpdate();
 
         System.out.println("Shipment " + shipmentId + " has been delivered.");
