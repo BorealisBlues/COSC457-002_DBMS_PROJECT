@@ -74,7 +74,6 @@ public class Driver {
         ResultSet rs = pstmt.getGeneratedKeys();
         if (rs.next()) {
             int userId = rs.getInt(1);
-
             System.out.println("Are you a carrier or a receiver?");
             String type = scanner.nextLine().toLowerCase();
 
@@ -83,8 +82,6 @@ public class Driver {
                     pstmt = con.prepareStatement("INSERT INTO Receiver (user_id) VALUES(?)");
                     pstmt.setInt(1, userId);
                     pstmt.executeUpdate();
-
-
                     break;
                 case "carrier":
                     System.out.println("Enter your vehicle make:");
@@ -120,9 +117,6 @@ public class Driver {
         scanner.close();
     }
 
-
-
-
     // RECEIVER FUCNTIONS
 
 
@@ -142,7 +136,6 @@ public class Driver {
     
         displayShipperItemsAndCreateShipment(selectedShipperId);
     }
-
 
     // display all the items of the selected shipper
     public void displayShipperItemsAndCreateShipment(String shipperId) throws SQLException {
@@ -170,8 +163,6 @@ public class Driver {
             System.out.println("Item ID: " + rs.getInt("item_id") + ", Name: " + rs.getString("name") + ", Price: " + rs.getFloat("price"));
         }
     }
-
-
 
     // select items for shipment and add them to the Contains table
     public void selectItemsForShipment(int shipment_id) throws SQLException {
@@ -212,8 +203,6 @@ public class Driver {
         pstmt.executeUpdate();
     }
 
-
-
     public void sumShipmentPriceAndCreateTransaction(int shipment_id) throws SQLException {
         float sum = 0.0f;
     
@@ -246,19 +235,7 @@ public class Driver {
         insertTransaction.executeUpdate();
     }
 
-
-
-
-
-    
-
-
-
-
-
     // CARRIER FUNCTIONS
-
-
     // display all the shipments that are available to the carrier (status of shipment is paid)
     public void displayAvailableShipmentsToCarrier() throws SQLException {
         Statement stmt = con.createStatement();
@@ -280,8 +257,6 @@ public class Driver {
     
         displayShipmentItemsAndSelect(selectedShipmentId, carrierId);
     }
-
-
 
     // display all the items of the selected shipment and the location of the shipper 
     public void displayShipmentItemsAndSelect(int shipmentId, int carrierId) throws SQLException {
@@ -317,8 +292,6 @@ public class Driver {
         }
     }
 
-
-
     // pick up the shipment and update the status of the shipment
     public void updateShipmentStatus(int shipmentId) throws SQLException {
         PreparedStatement pstmt = con.prepareStatement("UPDATE Shipment SET status = 'picked up' WHERE shipment_id = ?");
@@ -339,9 +312,6 @@ public class Driver {
 
         System.out.println("Shipment " + shipmentId + " has been delivered.");
     }
-
-
-
 
     // public void displayAvailableShipmentsToCarrier() throws SQLException{
     //     // Implimenting one of the expected queries
@@ -366,23 +336,23 @@ public class Driver {
     
     // }
 
-    // public void addNewUser(String type, String name, String email, String phone) throws SQLException{
-    //     PreparedStatement pstmt = con.prepareStatement("INSERT INTO ? ('Name','Email','Phone') VALUES(?,?,?)");
-    //     pstmt.setString(0, "User");
-    //     pstmt.setString(1, name);
-    //     pstmt.setString(2, email);
-    //     pstmt.setString(3, phone);
-    //     pstmt.executeUpdate();
-    //     // checking to make sure that we recieve a valid type
-    //     switch(type.toLowerCase()){
-    //         case "reciever","carrier","shipper":
-    //         pstmt.setString(0, type.toLowerCase());
-    //         pstmt.executeUpdate();
+    public void addNewUser(String type, String name, String email, String phone) throws SQLException{
+        PreparedStatement pstmt = con.prepareStatement("INSERT INTO ? ('Name','Email','Phone') VALUES(?,?,?)");
+        pstmt.setString(0, "User");
+        pstmt.setString(1, name);
+        pstmt.setString(2, email);
+        pstmt.setString(3, phone);
+        pstmt.executeUpdate();
+        // checking to make sure that we recieve a valid type
+        switch(type.toLowerCase()){
+            case "reciever","carrier","shipper":
+            pstmt.setString(0, type.toLowerCase());
+            pstmt.executeUpdate();
             
-    //         default:
-    //             System.out.println("Please try again and enter a valid user type! {reciever, carrier, shipper}");
-    //     }
-    // }
+            default:
+                System.out.println("Please try again and enter a valid user type! {reciever, carrier, shipper}");
+        }
+    }
 
     // public void addItemToShipperInventory(String shipper, String itemName, Float price) throws SQLException{
     //     PreparedStatement findShipperID = con.prepareStatement(
