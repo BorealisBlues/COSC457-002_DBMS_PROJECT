@@ -31,6 +31,16 @@ public class Driver {
 
             if (con != null) {
                 System.out.println("Connection successful!");
+
+                Driver driver = new Driver();
+
+                try {
+                    driver.createAccount();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+
             } else {
                 System.out.println("Failed to make connection!");
             }
@@ -40,21 +50,47 @@ public class Driver {
         } catch(SQLException e){
             System.out.println(e);
         }
+
+
     }
 
     // SHARED FUCNTION 
     
     public void createAccount() throws SQLException {
+
         Scanner scanner = new Scanner(System.in);
 
+        System.out.println("Already have an ccount? (yes/no)");
+        String response = scanner.nextLine();
+
+        if (response.equalsIgnoreCase("yes")) {
+            System.out.println("Receiver or Carrier? (receiver/carrier)");
+            String type = scanner.nextLine().toLowerCase();
+            if (type.equalsIgnoreCase("receiver")) {
+                displayShippersAndSelect();
+            } else if (type.equalsIgnoreCase("carrier")) {
+                displayAvailableShipmentsToCarrier();
+            } else {
+                System.out.println("Invalid type. Please enter either 'receiver' or 'carrier'.");
+            }
+            scanner.close();
+            return;
+        } else if (!response.equalsIgnoreCase("no")) {
+            System.out.println("Invalid response. Please enter either 'yes' or 'no'.");
+            scanner.close();
+            return;
+        } 
+
+
+
         System.out.println("Enter your name:");
-        String name = scanner.nextLine();
+        String user_name = scanner.nextLine();
 
         System.out.println("Enter your email:");
         String email = scanner.nextLine();
 
         System.out.println("Enter your phone number:");
-        String phone = scanner.nextLine();
+        String phone_number = scanner.nextLine();
 
         System.out.println("Enter your address:");
         String addr = scanner.nextLine();
@@ -64,9 +100,9 @@ public class Driver {
         scanner.nextLine();  // Consume newline left-over
 
         PreparedStatement pstmt = con.prepareStatement("INSERT INTO User (user_name, email, phone_number, addr, rating) VALUES(?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
-        pstmt.setString(1, name);
+        pstmt.setString(1, user_name);
         pstmt.setString(2, email);
-        pstmt.setString(3, phone);
+        pstmt.setString(3, phone_number);
         pstmt.setString(4, addr);
         pstmt.setFloat(5, rating);
         pstmt.executeUpdate();
@@ -75,7 +111,7 @@ public class Driver {
         if (rs.next()) {
             int userId = rs.getInt(1);
 
-            System.out.println("Are you a carrier or a receiver?");
+            System.out.println("Are you a carrier or a receiver (receiver/carrier):");
             String type = scanner.nextLine().toLowerCase();
 
             switch(type){
@@ -84,6 +120,9 @@ public class Driver {
                     pstmt.setInt(1, userId);
                     pstmt.executeUpdate();
 
+                    System.out.println("You have successfully created a receiver account with user ID " + userId);
+
+                    displayShippersAndSelect();
 
                     break;
                 case "carrier":
@@ -111,6 +150,8 @@ public class Driver {
                     pstmt.setString(5, color);
                     pstmt.setString(6, plate);
                     pstmt.executeUpdate();
+
+                    System.out.println("You have successfully created a carrier account with user ID " + userId);
                     break;
                 default:
                     System.out.println("Invalid type. Please enter either 'carrier' or 'receiver'.");
@@ -162,7 +203,7 @@ public class Driver {
         System.out.println("A new shipment has been created with status 'adding items'.");
 
 
-        PreparedStatement pstmt = con.prepareStatement("SELECT * FROM Item WHERE shipped_by = ?");
+        PreparedStatement pstmt = con.prepareStatement("SELECT * FROM Item WHERE shipper_id = ?");
         pstmt.setString(1, shipperId);
         ResultSet rs = pstmt.executeQuery();
     
