@@ -163,7 +163,7 @@ public class Driver {
     // RECEIVER FUCNTIONS
 
 
-    // display all the shippes and allow user to select a shipper; return the shipper's ID
+    // display all the shippes and allow user to select a shipper
     public void displayShippersAndSelect() throws SQLException {
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT * FROM Shipper");
@@ -312,12 +312,12 @@ public class Driver {
 
     // display all the items of the selected shipment and the location of the shipper 
     public void displayShipmentItemsAndSelect(int shipmentId, int carrierId) throws SQLException {
-        PreparedStatement pstmt = con.prepareStatement("SELECT * FROM Contains WHERE shipment_id = ?");
+        PreparedStatement pstmt = con.prepareStatement("SELECT Contains.item_id, Item.name, Contains.amount FROM Contains INNER JOIN Item ON Contains.item_id = Item.item_id WHERE Contains.shipment_id = ?");
         pstmt.setInt(1, shipmentId);
         ResultSet rs = pstmt.executeQuery();
-    
+        
         while(rs.next()){
-            System.out.println("Item ID: " + rs.getString("item_id") + ", Amount: " + rs.getInt("amount"));
+            System.out.println("Item ID: " + rs.getString("item_id") + ", Item Name: " + rs.getString("name") + ", Amount: " + rs.getInt("amount"));
         }
     
         // Display the location of the shipper
