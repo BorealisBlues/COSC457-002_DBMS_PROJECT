@@ -11,21 +11,31 @@ import java.util.*;
 
 public class Driver {
 
+    private Scanner scanner;
     private Connection con; // Declare con as an instance variable
 
+    public Driver() {
+        scanner = new Scanner(System.in);
+    }
+
     public static void main(String args[]){
+
+        Driver driver = new Driver(); // Initialize driver
+
+
         try{ //check that the driver is installed
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch(ClassNotFoundException e){
             System.out.println(e);
         }
 
+
+
         final String ID = "root"; // Login ID goes Here
         final String PW = "HTparking2002!"; //Login Password goes here
         final String SERVER = "jdbc:mysql://127.0.0.1:3306/database_project_schema?user=root"; //server location goes here
 
         try{
-            Driver driver = new Driver();
             driver.con = DriverManager.getConnection(SERVER, ID, PW); // Initialize con here
 
             if (driver.con != null) {
@@ -44,13 +54,13 @@ public class Driver {
         } catch(SQLException e){
             System.out.println(e);
         }
+        driver.scanner.close(); 
     }
 
     // SHARED FUCNTION 
     
     public void createAccount() throws SQLException {
 
-        Scanner scanner = new Scanner(System.in);
 
         System.out.println("Already have an ccount? (yes/no)");
         String response = scanner.nextLine();
@@ -65,11 +75,9 @@ public class Driver {
             } else {
                 System.out.println("Invalid type. Please enter either 'receiver' or 'carrier'.");
             }
-            scanner.close();
             return;
         } else if (!response.equalsIgnoreCase("no")) {
             System.out.println("Invalid response. Please enter either 'yes' or 'no'.");
-            scanner.close();
             return;
         } 
 
@@ -144,13 +152,15 @@ public class Driver {
                     pstmt.executeUpdate();
 
                     System.out.println("You have successfully created a carrier account with user ID " + userId);
+
+                    displayAvailableShipmentsToCarrier();
+
                     break;
                 default:
                     System.out.println("Invalid type. Please enter either 'carrier' or 'receiver'.");
             }
         }
 
-        scanner.close();
     }
 
     // RECEIVER FUCNTIONS
@@ -165,10 +175,8 @@ public class Driver {
             System.out.println("Shipper ID: " + rs.getInt("user_id") + ", Open Time: " + rs.getTime("open_time") + ", Close Time: " + rs.getTime("close_time"));
         }
     
-        Scanner scanner = new Scanner(System.in);
         System.out.println("Enter the ID of the shipper you want to select:");
         String selectedShipperId = scanner.nextLine();
-        scanner.close();
     
         displayShipperItemsAndCreateShipment(selectedShipperId);
     }
@@ -176,33 +184,39 @@ public class Driver {
     // display all the items of the selected shipper
     public void displayShipperItemsAndCreateShipment(String shipperId) throws SQLException {
         // Insert a new Shipment record
-        Scanner scanner = new Scanner(System.in);
         System.out.println("Enter the receiver ID for the new shipment:");
         int receiverId = scanner.nextInt();
         scanner.nextLine();  // Consume newline left-over
-        scanner.close();
-
-        PreparedStatement insertShipment = con.prepareStatement("INSERT INTO Shipment (status, shipper_id, receiver_id) VALUES (?, ?, ?)");
+    
+        PreparedStatement insertShipment = con.prepareStatement("INSERT INTO Shipment (status, shipper_id, receiver_id) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         insertShipment.setString(1, "adding items");
         insertShipment.setString(2, shipperId);
         insertShipment.setInt(3, receiverId);
         insertShipment.executeUpdate();
-
-        System.out.println("A new shipment has been created with status 'adding items'.");
-
-
+    
+        // Get the generated shipment id
+        ResultSet rs = insertShipment.getGeneratedKeys();
+        int shipmentId = 0;
+        if (rs.next()) {
+            shipmentId = rs.getInt(1);
+        }
+    
+        System.out.println("A new shipment has been created with status 'adding items' and ID " + shipmentId);
+    
         PreparedStatement pstmt = con.prepareStatement("SELECT * FROM Item WHERE shipper_id = ?");
         pstmt.setString(1, shipperId);
-        ResultSet rs = pstmt.executeQuery();
+        ResultSet rsItems = pstmt.executeQuery();
     
-        while(rs.next()){
-            System.out.println("Item ID: " + rs.getInt("item_id") + ", Name: " + rs.getString("name") + ", Price: " + rs.getFloat("price"));
+        while(rsItems.next()){
+            System.out.println("Item ID: " + rsItems.getString("item_id") + ", Name: " + rsItems.getString("name") + ", Price: " + rsItems.getFloat("price"));
         }
+        selectItemsForShipment(shipmentId);
     }
 
+    
     // select items for shipment and add them to the Contains table
     public void selectItemsForShipment(int shipment_id) throws SQLException {
-        Scanner scanner = new Scanner(System.in);
+        
         String item_id;
         int quantity;
     
@@ -228,7 +242,7 @@ public class Driver {
             subtractQuantityFromItems(item_id, quantity);
         }
     
-        scanner.close();
+        
     }
     
     // subtract item_count from Item table
@@ -271,6 +285,15 @@ public class Driver {
         insertTransaction.executeUpdate();
     }
 
+
+
+
+
+
+
+
+
+
     // CARRIER FUNCTIONS
     // display all the shipments that are available to the carrier (status of shipment is paid)
     public void displayAvailableShipmentsToCarrier() throws SQLException {
@@ -281,7 +304,7 @@ public class Driver {
             System.out.println("Shipment ID: " + rs.getInt("shipment_id") + ", Price: " + rs.getFloat("price"));
         }
     
-        Scanner scanner = new Scanner(System.in);
+        
 
         System.out.println("Enter the ID of the shipment you want to select:");
         int selectedShipmentId = scanner.nextInt();
@@ -289,7 +312,7 @@ public class Driver {
         System.out.println("Enter your carrier ID:");
         int carrierId = scanner.nextInt();
 
-        scanner.close();
+        
     
         displayShipmentItemsAndSelect(selectedShipmentId, carrierId);
     }
@@ -301,7 +324,7 @@ public class Driver {
         ResultSet rs = pstmt.executeQuery();
     
         while(rs.next()){
-            System.out.println("Item ID: " + rs.getInt("item_id") + ", Amount: " + rs.getInt("amount"));
+            System.out.println("Item ID: " + rs.getString("item_id") + ", Amount: " + rs.getInt("amount"));
         }
     
         // Display the location of the shipper
@@ -314,9 +337,10 @@ public class Driver {
         }
     
         System.out.println("Do you want to accept this shipment? (yes/no)");
-        Scanner scanner = new Scanner(System.in);
+        
+        scanner.nextLine();
+
         String response = scanner.nextLine();
-        scanner.close();
     
         if (response.equalsIgnoreCase("yes")) {
             // Update the carrier_id in the Shipment table
