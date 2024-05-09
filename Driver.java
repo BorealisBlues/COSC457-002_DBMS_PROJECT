@@ -276,10 +276,13 @@ public class Driver {
         updateStmt.setFloat(1, sum);
         updateStmt.setInt(2, shipment_id);
         updateStmt.executeUpdate();
-    
-        PreparedStatement insertTransaction = con.prepareStatement("INSERT INTO Transaction (amount, shipment_id) VALUES (?, ?)");
+        
+        Timestamp timestamp = new java.sql.Timestamp(System.currentTimeMillis());
+
+        PreparedStatement insertTransaction = con.prepareStatement("INSERT INTO Transaction (amount, shipment_id, time_paid) VALUES (?, ?, ?)");
         insertTransaction.setFloat(1, sum);
         insertTransaction.setInt(2, shipment_id);
+        insertTransaction.setTimestamp(3, timestamp);
         insertTransaction.executeUpdate();
     }
 
