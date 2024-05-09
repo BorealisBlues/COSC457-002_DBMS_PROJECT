@@ -11,10 +11,7 @@ import java.util.*;
 
 public class Driver {
 
-    Connection con;
-    /* TODO:
-     * 
-     */
+    private Connection con; // Declare con as an instance variable
 
     public static void main(String args[]){
         try{ //check that the driver is installed
@@ -25,15 +22,14 @@ public class Driver {
 
         final String ID = "root"; // Login ID goes Here
         final String PW = "HTparking2002!"; //Login Password goes here
-        final String SERVER = "jdbc:mysql://127.0.0.1:3306/?user=root"; //server location goes here
+        final String SERVER = "jdbc:mysql://127.0.0.1:3306/database_project_schema?user=root"; //server location goes here
 
         try{
-            Connection con = DriverManager.getConnection(SERVER, ID, PW);
+            Driver driver = new Driver();
+            driver.con = DriverManager.getConnection(SERVER, ID, PW); // Initialize con here
 
-            if (con != null) {
+            if (driver.con != null) {
                 System.out.println("Connection successful!");
-
-                Driver driver = new Driver();
 
                 try {
                     driver.createAccount();
@@ -41,18 +37,13 @@ public class Driver {
                     e.printStackTrace();
                 }
 
-
             } else {
                 System.out.println("Failed to make connection!");
             }
 
-            // Statement stmt = con.createStatement(); // creates a statement object
-
         } catch(SQLException e){
             System.out.println(e);
         }
-
-
     }
 
     // SHARED FUCNTION 
