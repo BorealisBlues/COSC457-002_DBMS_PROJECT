@@ -1,4 +1,3 @@
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -60,7 +59,6 @@ public class Driver {
     // SHARED FUCNTION 
     
     public void createAccount() throws SQLException {
-
 
         System.out.println("Already have an account? (yes/no)");
         String response = scanner.nextLine();
@@ -160,7 +158,6 @@ public class Driver {
                     System.out.println("Invalid type. Please enter either 'carrier' or 'receiver'.");
             }
         }
-
     }
 
     // RECEIVER FUCNTIONS
@@ -239,8 +236,6 @@ public class Driver {
     
             subtractQuantityFromItems(item_id, quantity);
         }
-    
-        
     }
     
     // subtract item_count from Item table
@@ -304,8 +299,6 @@ public class Driver {
         while(rs.next()){
             System.out.println("Shipment ID: " + rs.getInt("shipment_id") + ", Price: " + rs.getFloat("price"));
         }
-    
-        
 
         System.out.println("Enter the ID of the shipment you want to select:");
         int selectedShipmentId = scanner.nextInt();
@@ -313,8 +306,6 @@ public class Driver {
         System.out.println("Enter your carrier ID:");
         int carrierId = scanner.nextInt();
 
-        
-    
         displayShipmentItemsAndSelect(selectedShipmentId, carrierId);
     }
 
@@ -399,6 +390,4 @@ public class Driver {
 
         System.out.println("Shipment " + shipmentId + " has been delivered.");
     }
-
-    
 }
