@@ -208,8 +208,7 @@ public class Driver {
         ResultSet rsItems = pstmt.executeQuery();
     
         while(rsItems.next()){
-            System.out.println("Item ID: " + rsItems.getString("item_id") + ", Name: " + rsItems.getString("name") + ", Price: " + rsItems.getFloat("price"));
-        }
+            System.out.println("Item ID: " + rsItems.getString("item_id") + ", Name: " + rsItems.getString("name") + ", Price: " + rsItems.getFloat("price") + ", Description: " + rsItems.getString("description"));        }
         selectItemsForShipment(shipmentId);
     }
 
@@ -317,6 +316,7 @@ public class Driver {
         displayShipmentItemsAndSelect(selectedShipmentId, carrierId);
     }
 
+
     // display all the items of the selected shipment and the location of the shipper 
     public void displayShipmentItemsAndSelect(int shipmentId, int carrierId) throws SQLException {
         PreparedStatement pstmt = con.prepareStatement("SELECT * FROM Contains WHERE shipment_id = ?");
@@ -353,6 +353,7 @@ public class Driver {
         }
     }
 
+
     // pick up the shipment and update the status of the shipment
     public void updateShipmentStatus(int shipmentId) throws SQLException {
         PreparedStatement pstmt = con.prepareStatement("UPDATE Shipment SET status = ?, pickup_time = ? WHERE shipment_id = ?");
@@ -363,7 +364,26 @@ public class Driver {
 
         System.out.println("Shipment " + shipmentId + " has been picked up.");
 
+        displayReceiverAddress(shipmentId);
         deliverShipment(shipmentId);
+    }
+
+    public void displayReceiverAddress(int shipmentId) throws SQLException {
+        PreparedStatement pstmt = con.prepareStatement(
+            "SELECT User.addr FROM Shipment " +
+            "JOIN Receiver ON Shipment.receiver_id = Receiver.user_id " +
+            "JOIN User ON Receiver.user_id = User.user_id " +
+            "WHERE Shipment.shipment_id = ?"
+        );
+        pstmt.setInt(1, shipmentId);
+        ResultSet rs = pstmt.executeQuery();
+    
+        if (rs.next()) {
+            String address = rs.getString("addr");
+            System.out.println("The receiver's address for shipment ID" + shipmentId + " is: " + address);
+        } else {
+            System.out.println("No address found for shipment " + shipmentId);
+        }
     }
 
 
@@ -377,6 +397,9 @@ public class Driver {
 
         System.out.println("Shipment " + shipmentId + " has been delivered.");
     }
+
+
+
 
     // public void displayAvailableShipmentsToCarrier() throws SQLException{
     //     // Implimenting one of the expected queries
@@ -401,23 +424,23 @@ public class Driver {
     
     // }
 
-    public void addNewUser(String type, String name, String email, String phone) throws SQLException{
-        PreparedStatement pstmt = con.prepareStatement("INSERT INTO ? ('Name','Email','Phone') VALUES(?,?,?)");
-        pstmt.setString(0, "User");
-        pstmt.setString(1, name);
-        pstmt.setString(2, email);
-        pstmt.setString(3, phone);
-        pstmt.executeUpdate();
-        // checking to make sure that we recieve a valid type
-        switch(type.toLowerCase()){
-            case "reciever","carrier","shipper":
-            pstmt.setString(0, type.toLowerCase());
-            pstmt.executeUpdate();
+    // public void addNewUser(String type, String name, String email, String phone) throws SQLException{
+    //     PreparedStatement pstmt = con.prepareStatement("INSERT INTO ? ('Name','Email','Phone') VALUES(?,?,?)");
+    //     pstmt.setString(0, "User");
+    //     pstmt.setString(1, name);
+    //     pstmt.setString(2, email);
+    //     pstmt.setString(3, phone);
+    //     pstmt.executeUpdate();
+    //     // checking to make sure that we recieve a valid type
+    //     switch(type.toLowerCase()){
+    //         case "reciever","carrier","shipper":
+    //         pstmt.setString(0, type.toLowerCase());
+    //         pstmt.executeUpdate();
             
-            default:
-                System.out.println("Please try again and enter a valid user type! {reciever, carrier, shipper}");
-        }
-    }
+    //         default:
+    //             System.out.println("Please try again and enter a valid user type! {reciever, carrier, shipper}");
+    //     }
+    // }
 
     // public void addItemToShipperInventory(String shipper, String itemName, Float price) throws SQLException{
     //     PreparedStatement findShipperID = con.prepareStatement(
